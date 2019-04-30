@@ -1,0 +1,116 @@
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+EXEC SQL INCLUDE SQLCA;
+
+#define MAXLEN 20
+void get_string(char *s, int maxlen){
+    fgets(s,maxlen,stdin);
+    int last = strlen(s) -1;
+    if ( (s[last]=='\r') || (s[last]=='\n') )
+        s[last] = '\0';
+}
+
+void get_password(char *s, int maxlen){
+    system("stty -echo");
+    get_string(s,maxlen);
+    system("stty echo");
+}
+
+int get_int(){
+    char s[MAXLEN];
+    get_string(s,MAXLEN);
+    return atoi(s);
+}
+
+float get_float(){
+    char s[MAXLEN];
+    get_string(s,MAXLEN);
+    return atof(s);
+}
+
+int menu()
+{
+    int opcion = -1;
+
+    int MAXOPTS = 15; 
+    printf("\n");
+    printf("Menu Pokemon\n");
+    printf("==================\n\n");
+    printf("1. Insertar Pokemon\n");
+    printf("2. Insertar ataque\n");
+    printf("3. Insertar tipo\n");
+    printf("4. Insertar habilidad\n");
+    printf("5. Eliminar Pokemon\n");
+    printf("6. Eliminar ataque\n");
+    printf("7. Eliminar tipo\n");
+    printf("8. Eliminar habilidad\n");
+    printf("9. Buscar Pokemon\n");
+    printf("10. Buscar Pokemon por tipo\n");
+    printf("11. Actualizar HP\n");
+    printf("12. Aumentar porcentaje ATK\n");
+    printf("13. Transferir DEF\n");
+
+    printf("0. Salir\n");
+
+    while ( (opcion < 0) || (opcion > MAXOPTS)){
+        printf("OP> ");
+        opcion=get_int();
+    }
+    return opcion;
+}
+
+void gestionar_error(){
+    printf("Error %d: %.*s\n", sqlca.sqlcode,
+            sqlca.sqlerrm.sqlerrml,
+            sqlca.sqlerrm.sqlerrmc);
+}
+
+void conecta_bd(){
+    exec sql whenever sqlerror do gestionar_error();
+    exec sql begin declare section;
+    char usuario[30], clave[30];
+    exec sql end declare section;
+
+    printf("Conectando con Oracle...\n");
+    printf("Usuario: "); get_string(usuario, 29);
+    printf("Contraseña: "); get_password(clave, 29);
+
+    EXEC SQL CONNECT :usuario IDENTIFIED BY :clave;
+}
+
+void desconecta_bd(){
+    exec sql whenever sqlerror do gestionar_error();
+    EXEC SQL COMMIT RELEASE;
+    printf("Desconectado.\n");
+}
+
+int main()
+{
+    conecta_bd();
+
+    int op;
+
+    while ( (op=menu()) != 0){
+        switch(op){
+                case 1: insertar_pokemon(); break;
+                case 2: insertar_ataque(); break;
+                case 3: insertar_tipo(); break;
+                case 4: insertar_habilidad(); break;
+                case 5: eliminar_pokemon(); break;
+                case 6: eliminar_ataque(); break;
+                case 7: eliminar_tipo(); break;
+                case 8: eliminar_habilidad(); break;
+                case 9: buscar_pokemon(); break;
+                case 10: buscar_pokemon_pot_tipo(); break;
+                case 11: actualizar_hp(); break;
+                case 12: aumentar_porcentaje_atk(); break;
+                case 13: transferir_def(); break;
+        }
+
+    }
+    desconecta_bd();
+
+    return 0;
+}
+

@@ -1,0 +1,43 @@
+Tabla Pokemon: tabla para definir a cada pokemon
+
+	Atributos:
+
+		- idP : identificador del pokemon. 
+		- nombreP : nombre del pokemon.
+		- HP : puntos de vida del pokemon.
+		- ATK : puntos de ataque del pokemon.
+		- DEF : puntos de defensa del pokemon.
+		- SPE : puntos de velocidad del pokemon.
+
+	Restricciones:
+
+		- Clave primaria : idP
+		- not null : ningún atributo de la tabla Pokemon puede ser nulo, porque cada atributo es totalmente necesario para definir a cada pokemon
+		- Clave foránea : 
+
+
+
+Tabla Ataque: tabla para definir el ataque que puede usar cada pokemon
+
+	Atributos:
+
+		- idA : identificador del ataque. Clave primaria de la tabla Ataque.
+		- nombreA : nombre edl ataque.
+		- PP : número de veces que se puede usar el ataque en combate.
+		- Potencia
+		- Precisión
+
+Tabla Tipo
+
+	Atributos:
+
+		- idT : identificador del tipo. Clave primaria de la tabla Tipo. 
+		- nombreT : nombre del tipo 
+
+Tabla Habilidad: tabla para definir la habilidad de cada pokemon
+
+	Atributos:
+
+		- idH : identificador de la habilidad. Clave primaria de la tabla Habilidad.
+		- nombreH : nombre de la habilidad.
+		- descripción

@@ -39,17 +39,13 @@ int menu()
     printf("==================\n\n");
     printf("1. Insertar Pokemon\n");
     printf("2. Insertar ataque\n");
-    printf("3. Insertar tipo\n");
-    printf("4. Insertar habilidad\n");
-    printf("5. Eliminar Pokemon\n");
-    printf("6. Eliminar ataque\n");
-    printf("7. Eliminar tipo\n");
-    printf("8. Eliminar habilidad\n");
-    printf("9. Buscar Pokemon\n");
-    printf("10. Buscar Pokemon por tipo\n");
-    printf("11. Actualizar HP\n");
-    printf("12. Aumentar porcentaje ATK\n");
-    printf("13. Transferir DEF\n");
+    printf("3. Eliminar Pokemon\n");
+    printf("4. Eliminar ataque\n");
+    printf("5. Buscar Pokemon\n");
+    printf("6. Buscar Pokemon por tipo\n");
+    printf("7. Actualizar HP\n");
+    printf("8. Aumentar porcentaje ATK\n");
+    printf("9. Intercambiar estadisticas\n");
 
     printf("0. Salir\n");
 
@@ -61,9 +57,19 @@ int menu()
 }
 
 void gestionar_error(){
-    printf("Error %d: %.*s\n", sqlca.sqlcode,
+    switch(sqlca.sqlcode){
+        case -1017:
+        case -1005:
+            printf("No se pudo conectar con Oracle\n");
+            exit(-1);
+        case -1012:
+            printf("No se puede desconectar, usuario no conectado");
+            break;
+        default:
+            printf("Error %d: %.*s\n", sqlca.sqlcode,
             sqlca.sqlerrm.sqlerrml,
             sqlca.sqlerrm.sqlerrmc);
+    }
 }
 
 void conecta_bd(){
@@ -93,19 +99,15 @@ int main()
 
     while ( (op=menu()) != 0){
         switch(op){
-                case 1: insertar_pokemon(); break;
-                case 2: insertar_ataque(); break;
-                case 3: insertar_tipo(); break;
-                case 4: insertar_habilidad(); break;
-                case 5: eliminar_pokemon(); break;
-                case 6: eliminar_ataque(); break;
-                case 7: eliminar_tipo(); break;
-                case 8: eliminar_habilidad(); break;
-                case 9: buscar_pokemon(); break;
-                case 10: buscar_pokemon_pot_tipo(); break;
-                case 11: actualizar_hp(); break;
-                case 12: aumentar_porcentaje_atk(); break;
-                case 13: transferir_def(); break;
+                // case 1: insertar_pokemon(); break;
+                // case 2: insertar_ataque(); break;
+                // case 3: eliminar_pokemon(); break;
+                // case 4: eliminar_ataque(); break; 
+                // case 5: buscar_pokemon(); break;
+                // case 6: buscar_pokemon_pot_tipo(); break;
+                // case 7: actualizar_hp(); break;
+                // case 8: aumentar_porcentaje_atk(); break;
+                // case 9: intercambiar_estadisticas(); break;
         }
 
     }

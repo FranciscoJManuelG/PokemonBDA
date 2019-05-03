@@ -33,22 +33,23 @@ int menu()
 {
     int opcion = -1;
 
-    int MAXOPTS = 15; 
-    printf("\n");
-    printf("Menu Pokemon\n");
-    printf("==================\n\n");
-    printf("1. Insertar Pokemon\n");
-    printf("2. Insertar ataque\n");
-    printf("3. Eliminar Pokemon\n");
-    printf("4. Eliminar ataque\n");
-    printf("5. Buscar Pokemon\n");
-    printf("6. Buscar Pokemon por tipo\n");
-    printf("7. Actualizar HP\n");
-    printf("8. Aumentar porcentaje ATK\n");
-    printf("9. Intercambiar estadisticas\n");
-
-    printf("0. Salir\n");
-
+    int MAXOPTS = 15;
+    printf("\n"); 
+    printf(" ---------------------------------\n");
+    printf("|          MENU POKEMON           |\n");
+    printf(" ---------------------------------\n");
+    printf("| 1. Insertar Pokemon             |\n");
+    printf("| 2. Insertar ataque              |\n");
+    printf("| 3. Eliminar Pokemon             |\n");
+    printf("| 4. Eliminar ataque              |\n");
+    printf("| 5. Buscar Pokemon               |\n");
+    printf("| 6. Buscar Pokemon por tipo      |\n");
+    printf("| 7. Actualizar HP                |\n");
+    printf("| 8. Aumentar porcentaje ATK      |\n");
+    printf("| 9. Intercambiar estadisticas    |\n");
+    printf(" ---------------------------------\n");
+    printf("| 0. Salir                        |\n");
+    printf(" ---------------------------------\n");
     while ( (opcion < 0) || (opcion > MAXOPTS)){
         printf("OP> ");
         opcion=get_int();
@@ -71,6 +72,59 @@ void gestionar_error(){
             sqlca.sqlerrm.sqlerrmc);
     }
 }
+
+int gestionar_errordml(int do_rollback, char *tabla){
+    exec sql whenever sqlerror continue;
+    int cod = sqlca.sqlcode;
+    switch(cod){
+        case -1:
+            printf("\nYa existe una fila con ese código de Pókemon en la tabla  %s\n", tabla);
+            break;
+        case -2291:
+            printf("\nAlguno de los valores introducidos es NULL y ese campo no admite nulos en la tabla %s\n", tabla);
+            break;
+        default: 
+            printf("\nError %d: %.*s\n", sqlca.sqlcode,
+            sqlca.sqlerrm.sqlerrml,
+            sqlca.sqlerrm.sqlerrmc);
+    }
+    if (do_rollback){
+        exec sql rollback;
+    }
+    return cod;
+}
+
+void insertar_pokemon(){
+    int error = 0;
+    exec sql whenever sqlerror do error=gestionar_errordml(1, "POKEMON");
+
+    exec sql begin declare section;
+    int codigo_pok;
+    char nombre_pok[20];
+    int hp, atk, def, spe;
+    int codigo_ata, codigo_tipo, codigo_hab;
+    exec sql end declare section;
+
+    printf("Código del Pokémon: "); codigo_pok = get_int();
+    printf("Nombre del Pokémon: "); get_string(nombre_pok, 19);
+    printf("HP: "); hp = get_int();
+    printf("ATK: "); atk = get_int();
+    printf("DEF: "); def = get_int();
+    printf("SPE: "); spe = get_int();
+    printf("Código del ataque: "); codigo_ata = get_int();
+    printf("Código del tipo: "); codigo_tipo = get_int();
+    printf("Código de la habilidad: "); codigo_hab = get_int();
+
+    EXEC SQL INSERT INTO POKEMON
+            VALUES(:codigo_pok, :nombre_pok, :hp, :atk, :def, :spe, :codigo_ata, :codigo_tipo, :codigo_hab);
+    if(!error){
+            exec sql commit;
+            printf("\nPokémon añadido\n");
+    }
+
+}
+
+
 
 void conecta_bd(){
     exec sql whenever sqlerror do gestionar_error();
@@ -99,7 +153,7 @@ int main()
 
     while ( (op=menu()) != 0){
         switch(op){
-                // case 1: insertar_pokemon(); break;
+                 case 1: insertar_pokemon(); break;
                 // case 2: insertar_ataque(); break;
                 // case 3: eliminar_pokemon(); break;
                 // case 4: eliminar_ataque(); break; 

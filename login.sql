@@ -4,4 +4,4 @@ set feed 1
 
 set linesize 100
 
-column descripcion format a30
+column descripcion format a50

@@ -9,7 +9,7 @@ CREATE TABLE ATAQUE
         PP NUMBER(4) NOT NULL,
         POTENCIA NUMBER(3),
         PRECISION NUMBER(3),
-        IDT NUMBER(2) CONSTRAINT FK_IDT REFERENCES TIPO NOT NULL
+        IDT NUMBER(2) CONSTRAINT FK_IDT_A REFERENCES TIPO NOT NULL
         );
 
 CREATE TABLE HABILIDAD
@@ -26,7 +26,7 @@ CREATE TABLE POKEMON
         DEF NUMBER(4) NOT NULL,
         SPE NUMBER(4) NOT NULL,
         IDA NUMBER(2) CONSTRAINT FK_IDA REFERENCES ATAQUE NOT NULL,
-        IDT NUMBER(2) CONSTRAINT FK_IDT REFERENCES TIPO NOT NULL,
+        IDT NUMBER(2) CONSTRAINT FK_IDT_P REFERENCES TIPO NOT NULL,
         IDH NUMBER(2) CONSTRAINT FK_IDH REFERENCES HABILIDAD NOT NULL
         );
 
@@ -41,7 +41,7 @@ INSERT INTO ATAQUE VALUES (4,'LANZALLAMAS',15,90,100,1);
 INSERT INTO ATAQUE VALUES (5,'LLAMARADA',5,110,85,1);
 INSERT INTO ATAQUE VALUES (6,'LATIGO CEPA',25,45,100,3);
 
-INSERT INTO HABILIDAD VALUES (1,'TORRENTE','Torrente aumenta la potencia de los movimientos de tipo agua del poseedor en un 50% cuando su salud esté igual o por debajo de 1/3 de sus PS máximos.');
-INSERT INTO HABILIDAD VALUES (2,'MAR LLAMAS','Mar llamas aumenta la potencia de los movimientos de tipo fuego del poseedor en un 50% cuando su salud esté igual o por debajo de 1/3 de sus PS máximos.');
-INSERT INTO HABILIDAD VALUES (3,'PODER SOLAR','Poder solar en clima soleado aumenta el ataque especial del Pokémon poseedor en un 50%, pero a cambio el Pokémon pierde 1/8 de sus PS máximos al final de cada turno.');
-INSERT INTO HABILIDAD VALUES (4,'ESPESURA','Espesura aumenta la potencia de los movimientos de tipo planta del poseedor en un 50% cuando su salud esté igual o por debajo de 1/3 de sus PS máximos.');
+INSERT INTO HABILIDAD VALUES (1,'TORRENTE','Potencia tipo agua +50%.');
+INSERT INTO HABILIDAD VALUES (2,'MAR LLAMAS','Potencia tipo fuego +50%.');
+INSERT INTO HABILIDAD VALUES (3,'ARMADURA BATALLA','Ataque enemigo nunca es crítico.');
+INSERT INTO HABILIDAD VALUES (4,'ESPESURA','Potencia tipo planta +50%.');

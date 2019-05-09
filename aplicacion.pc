@@ -124,7 +124,77 @@ void insertar_pokemon(){
 
 }
 
+void insertar_ataque(){
+    int error = 0;
+    exec sql whenever sqlerror do error=gestionar_errordml(1, "ATAQUE");
 
+    exec sql begin declare section;
+    int codigo_ata;
+    char nombre_ata[20];
+    int pp, potencia, precision;
+    int codigo_tipo;
+    short potencia_ind = 0;
+    short precision_ind = 0;
+    exec sql end declare section;
+
+    printf("Código del ataque: "); codigo_ata = get_int();
+    printf("Nombre del ataque: "); get_string(nombre_ata, 19);
+    printf("PP: "); pp = get_int();
+    printf("Potencia: "); potencia = get_int();
+    printf("Precisión: "); precision = get_int();
+    printf("Código del tipo: "); codigo_tipo = get_int();
+
+    EXEC SQL INSERT INTO ATAQUE
+            VALUES(:codigo_ata, :nombre_ata, :pp, :potencia:potencia_ind,
+             :precision:precision_ind, :codigo_tipo);
+    if(!error){
+            exec sql commit;
+            printf("\nAtaque añadido\n");
+    }
+
+}
+
+void eliminar_pokemon(){
+   int error = 0;
+   exec sql whenever sqlerror do error=gestionar_errordml(1, "POKEMON");
+
+   exec sql begin declare section;
+   char texto[30], patron[34];
+   exec sql end declare section;
+
+   printf("Borrar Pokemon que empiezen por: "); get_string(texto, 29);
+   strcat(patron, texto);
+   strcat(patron, "%");
+
+   EXEC SQL DELETE FROM POKEMON
+        WHERE NOMBREP like :patron;
+
+   if(!error){
+        printf("\nPokemon borrados: %d.\n", sqlca.sqlerrd[2]);
+        exec sql commit;
+   }
+
+}
+
+void eliminar_ataque(){
+   int error = 0;
+   exec sql whenever sqlerror do error=gestionar_errordml(1, "ATAQUE");
+
+   exec sql begin declare section;
+   int codigo_ata;
+   exec sql end declare section;
+
+   printf("Borrar ataque que tenga el codigo: "); codigo_ata = get_int();
+
+   EXEC SQL DELETE FROM ATAQUE
+        WHERE IDA = :codigo_ata;
+
+   if(!error){
+        printf("\nAtaque borrado");
+        exec sql commit;
+   }
+
+}
 
 void conecta_bd(){
     exec sql whenever sqlerror do gestionar_error();
@@ -153,10 +223,10 @@ int main()
 
     while ( (op=menu()) != 0){
         switch(op){
-                 case 1: insertar_pokemon(); break;
-                // case 2: insertar_ataque(); break;
-                // case 3: eliminar_pokemon(); break;
-                // case 4: eliminar_ataque(); break; 
+                case 1: insertar_pokemon(); break;
+                case 2: insertar_ataque(); break;
+                case 3: eliminar_pokemon(); break;
+                case 4: eliminar_ataque(); break; 
                 // case 5: buscar_pokemon(); break;
                 // case 6: buscar_pokemon_pot_tipo(); break;
                 // case 7: actualizar_hp(); break;

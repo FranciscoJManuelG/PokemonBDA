@@ -155,44 +155,80 @@ void insertar_ataque(){
 }
 
 void eliminar_pokemon(){
-   int error = 0;
-   exec sql whenever sqlerror do error=gestionar_errordml(1, "POKEMON");
+    int error = 0;
+    exec sql whenever sqlerror do error=gestionar_errordml(1, "POKEMON");
 
-   exec sql begin declare section;
-   char texto[30], patron[34];
-   exec sql end declare section;
+    exec sql begin declare section;
+    int codigo_pok;
+    exec sql end declare section;
 
-   printf("Borrar Pokemon que empiezen por: "); get_string(texto, 29);
-   strcat(patron, texto);
-   strcat(patron, "%");
+    printf("Borrar Pokemon que tenga el codigo: "); codigo_pok = get_int();
 
-   EXEC SQL DELETE FROM POKEMON
-        WHERE NOMBREP like :patron;
+    EXEC SQL DELETE FROM POKEMON
+        WHERE IDP = :codigo_pok;
 
-   if(!error){
-        printf("\nPokemon borrados: %d.\n", sqlca.sqlerrd[2]);
+    if(sqlca.sqlerrd[2] == 0 && !error){
+        printf("\nEl Pokemon con ese ID no existe\n");
+        exec sql commit;
+    }else if(!error){
+        printf("\nPokemon borrado\n");
+        exec sql commit;
+    }
+
+
+}
+
+void eliminar_ataque(){
+    int error = 0;
+    exec sql whenever sqlerror do error=gestionar_errordml(1, "ATAQUE");
+
+    exec sql begin declare section;
+    int codigo_ata;
+    exec sql end declare section;
+
+    printf("Borrar ataque que tenga el codigo: "); codigo_ata = get_int();
+
+    EXEC SQL DELETE FROM ATAQUE
+            WHERE IDA = :codigo_ata;
+
+    if(sqlca.sqlerrd[2] == 0 && !error){
+        printf("\nEl ataque con ese ID no existe\n");
+        exec sql commit;
+    } else if(!error){
+        printf("\nAtaque borrado\n");
         exec sql commit;
    }
 
 }
 
-void eliminar_ataque(){
-   int error = 0;
-   exec sql whenever sqlerror do error=gestionar_errordml(1, "ATAQUE");
+void buscar_pokemon(){
+    int error = 0;
+    exec sql whenever sqlerror do error=gestionar_errordml(1, "POKEMON");
 
-   exec sql begin declare section;
-   int codigo_ata;
-   exec sql end declare section;
+    exec sql begin declare section;
+    int codigo_pok;
+    char nombre_pok[20], nombre_ata[20], nombre_tipo[20];
+    int hp, atk, def, spe;
+    exec sql end declare section;
 
-   printf("Borrar ataque que tenga el codigo: "); codigo_ata = get_int();
+    printf("Codigo del Pokemon: "); codigo_pok = get_int();
 
-   EXEC SQL DELETE FROM ATAQUE
-        WHERE IDA = :codigo_ata;
+    EXEC SQL SELECT nombrep, hp, atk, def, spe, nombrea, nombret
+            INTO :nombre_pok, :hp, :atk, :def, :spe, :nombre_ata, :nombre_tipo
+            FROM pokemon  p JOIN ataque a 
+            ON p.ida = a.ida
+            JOIN tipo t 
+            ON p.idt = t.idt 
+            WHERE idp = :codigo_pok;
 
-   if(!error){
-        printf("\nAtaque borrado");
-        exec sql commit;
-   }
+    if(!error){
+            if(sqlca.sqlcode==1403)
+                    printf("\nPokemon inexistente\n");
+            else{
+                printf("\nPokemon: [%d\t, %s\t, HP: %d\t, ATK: %d\t, DEF: %d\t, SPE: %d\t, ATAQUE: %s\t, %s]\n", codigo_pok, nombre_pok, hp, atk, def, spe, nombre_ata, nombre_tipo);
+            }
+            exec sql commit;
+    }
 
 }
 
@@ -227,8 +263,8 @@ int main()
                 case 2: insertar_ataque(); break;
                 case 3: eliminar_pokemon(); break;
                 case 4: eliminar_ataque(); break; 
-                // case 5: buscar_pokemon(); break;
-                // case 6: buscar_pokemon_pot_tipo(); break;
+                case 5: buscar_pokemon(); break;
+                // case 6: buscar_pokemon_por_tipo(); break;
                 // case 7: actualizar_hp(); break;
                 // case 8: aumentar_porcentaje_atk(); break;
                 // case 9: intercambiar_estadisticas(); break;

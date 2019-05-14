@@ -81,13 +81,16 @@ int gestionar_errordml(int do_rollback, char *tabla){
             printf("\nYa existe una fila con ese código de Pókemon en la tabla  %s\n", tabla);
             break;
         case -2291:
-            printf("\nAlguno de los valores introducidos es NULL y ese campo no admite nulos en la tabla %s\n", tabla);
+            printf("\nNo existe una entrada en la tabla referenciada para alguno de los el valores introducidos como clave foránea\n");
             break;
         case -2292:
             printf("\nEse ataque no se puede eliminar porque está asignado a un Pokemon\n");
             break;
         case -8177:
             printf("\nOtro usuario está modificando la tabla Pokemon, vuelva a intentarlo más tarde\n");
+            break;
+        case -1400:
+            printf("\nAlguno de los valores introducidos es NULL, y esa columna no acepta nulos\n");
             break;
         default: 
             printf("\nError %d: %.*s\n", sqlca.sqlcode,
@@ -289,6 +292,8 @@ void actualizar_pp(){
     printf("Introduce el código del ataque: "); codigo_ata=get_int();
     printf("Introduce el nuevo valor para los PP: "); new_pp=get_int();
 
+    EXEC SQL SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
     exec sql update ataque
         set pp = :new_pp
         where ida = :codigo_ata;
@@ -314,6 +319,8 @@ void aumentar_porcentaje_atk(){
     printf("Introduce el código del Pokemon: "); codigo_pok=get_int();
     printf("Introduce el porcentaje que quieres incrementar el ATK: "); porcentaje=get_int();
 
+    EXEC SQL SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
     exec sql update pokemon
             set atk = atk + atk*:porcentaje/100
             where idp = :codigo_pok;
@@ -338,7 +345,6 @@ void intercambiar_estadisticas(){
     exec sql end declare section;
 
     printf("Introduce el código del Pokemon 1 para intercambiar estadisticas: "); codigo_pok1=get_int();
-    printf("Introduce el código del Pokemon 2 para intercambiar estadisticas: "); codigo_pok2=get_int();
 
     EXEC SQL SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
     
@@ -346,25 +352,38 @@ void intercambiar_estadisticas(){
             INTO :hp1, :atk1, :def1, :spe1
             FROM pokemon
             WHERE idp = :codigo_pok1;
+    
+    if(sqlca.sqlcode==1403){
+        printf("\nPrimer Pokemon inexistente\n");
+        break;
+    }
+
+    printf("Introduce el código del Pokemon 2 para intercambiar estadisticas: "); codigo_pok2=get_int();
 
     EXEC SQL SELECT hp, atk, def, spe
             INTO :hp2, :atk2, :def2, :spe2
             FROM pokemon
             WHERE idp = :codigo_pok2;
 
+    if(sqlca.sqlcode==1403){
+        printf("\nSegundo Pokemon inexistente\n");
+        break;
+    }
+
     exec sql update pokemon
             set hp = :hp2, atk = :atk2, def = :def2, spe = :spe2
             where idp = :codigo_pok1;
 
-    exec sql update pokemon
+    if (!error){
+        exec sql update pokemon
             set hp = :hp1, atk = :atk1, def = :def1, spe = :spe1
             where idp = :codigo_pok2;
+    }
 
     if(!error){
+        printf("%d", sqlca.sqlerrd[2]);
         if(sqlca.sqlerrd[2])
             printf("\nEstadísticas de los Pokemon se han intercambiado\n");
-        else
-            printf("\nAlgún Pokemon no se ha encontrado\n");
         exec sql commit;
    }
 }

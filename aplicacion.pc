@@ -83,6 +83,9 @@ int gestionar_errordml(int do_rollback, char *tabla){
         case -2291:
             printf("\nAlguno de los valores introducidos es NULL y ese campo no admite nulos en la tabla %s\n", tabla);
             break;
+        case -2292:
+            printf("\nEse ataque no se puede eliminar porque está asignado a un Pokemon\n");
+            break;
         default: 
             printf("\nError %d: %.*s\n", sqlca.sqlcode,
             sqlca.sqlerrm.sqlerrml,
@@ -191,19 +194,22 @@ void eliminar_ataque(){
     EXEC SQL DELETE FROM ATAQUE
             WHERE IDA = :codigo_ata;
 
-    if(sqlca.sqlerrd[2] == 0 && !error){
-        printf("\nEl ataque con ese ID no existe\n");
+    if (!error){
+        if(sqlca.sqlerrd[2] == 0)
+            printf("\nEl ataque con ese ID no existe\n");
+        else 
+            printf("\nAtaque borrado\n");
         exec sql commit;
-    } else if(!error){
-        printf("\nAtaque borrado\n");
-        exec sql commit;
-   }
+    }
+    
 
 }
 
 void buscar_pokemon(){
     int error = 0;
     exec sql whenever sqlerror do error=gestionar_errordml(1, "POKEMON");
+
+    exec sql SET TRANSACTION READ ONLY;
 
     exec sql begin declare section;
     int codigo_pok;
@@ -225,7 +231,7 @@ void buscar_pokemon(){
             if(sqlca.sqlcode==1403)
                     printf("\nPokemon inexistente\n");
             else{
-                printf("\nPokemon: [ID: %d\t, %s\t, HP: %d\t, ATK: %d\t, DEF: %d\t, SPE: %d\t, ATAQUE: %s\t, Tipo: %s]\n",
+                printf("\nPokemon: ID: %d, %s, HP: %d, ATK: %d, DEF: %d, SPE: %d, ATAQUE: %s, Tipo: %s\n",
                  codigo_pok, nombre_pok, hp, atk, def, spe, nombre_ata, nombre_tipo);
             }
             exec sql commit;
@@ -242,11 +248,11 @@ void buscar_pokemon_por_tipo(){
     exec sql begin declare section;
     int codigo_pok, codigo_tipo;
     char nombre_pok[20], nombre_tipo[20];
-    int hp, atk, def;
+    int hp, atk, def, spe;
     exec sql end declare section;
 
     exec sql declare c_pok cursor for
-            select idp, nombrep, hp, atk, def, t.nombret
+            select idp, nombrep, hp, atk, def, spe, t.nombret
                 from pokemon p join tipo t
                 on p.idt = t.idt
                 where p.idt = :codigo_tipo;
@@ -257,9 +263,9 @@ void buscar_pokemon_por_tipo(){
     EXEC SQL WHENEVER NOT FOUND DO BREAK;
     printf("\n\n");
     while(1){
-            EXEC SQL FETCH c_pok INTO :codigo_pok, :nombre_pok, :hp, :atk, :def, :nombre_tipo;
-            printf("POKEMON: \tCodigo Pokemon: %d\tNombre: %s\tHP: %d\tATK: %d\tDEF: %d\tTipo: %s\n",
-             codigo_pok, nombre_pok, hp, atk, def, nombre_tipo);
+            EXEC SQL FETCH c_pok INTO :codigo_pok, :nombre_pok, :hp, :atk, :def, :spe, :nombre_tipo;
+            printf("POKEMON: \tCodigo Pokemon: %4d\tNombre: %20s\tHP: %4d\tATK: %4d\tDEF: %4d\tSPE: %4d\tTipo: %10s\n",
+             codigo_pok, nombre_pok, hp, atk, def, spe, nombre_tipo);
     }
     EXEC SQL WHENEVER NOT FOUND continue;
         printf("\nPokemon encontrados: %d\n", sqlca.sqlerrd[2]);
@@ -310,11 +316,11 @@ void aumentar_porcentaje_atk(){
             where idp = :codigo_pok;
 
     if(!error){
-            if(sqlca.sqlerrd[2])
-                printf("\nATK del Pokemon modificado\n");
-            else
-                printf("\nPokemon no encontrado\n");
-            exec sql commit;
+        if(sqlca.sqlerrd[2])
+            printf("\nATK del Pokemon modificado\n");
+        else
+            printf("\nPokemon no encontrado\n");
+        exec sql commit;
    }
 
 }
@@ -345,16 +351,18 @@ void intercambiar_estadisticas(){
             set hp = :hp2, atk = :atk2, def = :def2, spe = :spe2
             where idp = :codigo_pok1;
 
+    printf("Introduce el código del Pokemon 1 para intercambiar estadisticas: "); codigo_pok1=get_int();
+
     exec sql update pokemon
             set hp = :hp1, atk = :atk1, def = :def1, spe = :spe1
             where idp = :codigo_pok2;
 
     if(!error){
-            if(sqlca.sqlerrd[2])
-                printf("\nEstadísticas de los Pokemon se han intercambiado\n");
-            else
-                printf("\nAlgún Pokemon no se ha encontrado\n");
-            exec sql commit;
+        if(sqlca.sqlerrd[2])
+            printf("\nEstadísticas de los Pokemon se han intercambiado\n");
+        else
+            printf("\nAlgún Pokemon no se ha encontrado\n");
+        exec sql commit;
    }
 }
 
@@ -385,15 +393,15 @@ int main()
 
     while ( (op=menu()) != 0){
         switch(op){
-                case 1: insertar_pokemon(); break;
-                case 2: insertar_ataque(); break;
-                case 3: eliminar_pokemon(); break;
-                case 4: eliminar_ataque(); break; 
-                case 5: buscar_pokemon(); break;
-                case 6: buscar_pokemon_por_tipo(); break;
-                case 7: actualizar_pp(); break;
-                case 8: aumentar_porcentaje_atk(); break;
-                case 9: intercambiar_estadisticas(); break;
+            case 1: insertar_pokemon(); break;
+            case 2: insertar_ataque(); break;
+            case 3: eliminar_pokemon(); break;
+            case 4: eliminar_ataque(); break; 
+            case 5: buscar_pokemon(); break;
+            case 6: buscar_pokemon_por_tipo(); break;
+            case 7: actualizar_pp(); break;
+            case 8: aumentar_porcentaje_atk(); break;
+            case 9: intercambiar_estadisticas(); break;
         }
 
     }

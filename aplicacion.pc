@@ -86,6 +86,9 @@ int gestionar_errordml(int do_rollback, char *tabla){
         case -2292:
             printf("\nEse ataque no se puede eliminar porque está asignado a un Pokemon\n");
             break;
+        case -8177:
+            printf("\nOtro usuario está modificando la tabla Pokemon, vuelva a intentarlo más tarde\n");
+            break;
         default: 
             printf("\nError %d: %.*s\n", sqlca.sqlcode,
             sqlca.sqlerrm.sqlerrml,
@@ -337,6 +340,8 @@ void intercambiar_estadisticas(){
     printf("Introduce el código del Pokemon 1 para intercambiar estadisticas: "); codigo_pok1=get_int();
     printf("Introduce el código del Pokemon 2 para intercambiar estadisticas: "); codigo_pok2=get_int();
 
+    EXEC SQL SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
     EXEC SQL SELECT hp, atk, def, spe
             INTO :hp1, :atk1, :def1, :spe1
             FROM pokemon
@@ -350,8 +355,6 @@ void intercambiar_estadisticas(){
     exec sql update pokemon
             set hp = :hp2, atk = :atk2, def = :def2, spe = :spe2
             where idp = :codigo_pok1;
-
-    printf("Introduce el código del Pokemon 1 para intercambiar estadisticas: "); codigo_pok1=get_int();
 
     exec sql update pokemon
             set hp = :hp1, atk = :atk1, def = :def1, spe = :spe1

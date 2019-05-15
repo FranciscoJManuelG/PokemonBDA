@@ -4,21 +4,21 @@ Tabla Pokemon: tabla para definir a cada pokemon
 
     Atributos:
 
-        - idP : identificador del pokemon. 
-        - nombreP : nombre del pokemon.
-        - HP : puntos de vida del pokemon.
-        - ATK : puntos de ataque del pokemon.
-        - DEF : puntos de defensa del pokemon.
-        - SPE : puntos de velocidad del pokemon.
-        - idT : identificador del tipo del pokemon
-        - idH : identificador de la habilidad del pokemon
-        - idA : identificador del ataque aprendido por el pokemon
+        - int       idP : identificador del pokemon. 
+        - String    nombreP : nombre del pokemon.
+        - int       HP : puntos de vida del pokemon.
+        - int       ATK : puntos de ataque del pokemon.
+        - int       DEF : puntos de defensa del pokemon.
+        - int       SPE : puntos de velocidad del pokemon.
+        - int       idT : identificador del tipo del pokemon.
+        - int       idH : identificador de la habilidad del pokemon.
+        - int       idA : identificador del ataque aprendido por el pokemon.
 
     Restricciones:
 
         - Clave primaria : idP
         - not null : ningún atributo de la tabla Pokemon puede ser nulo, porque cada atributo es totalmente necesario para definir a cada pokemon
-        - Clave foránea : idT(Tipo), idH(Habilidad), idA(Ataque)
+        - Clave foránea : idT(Tabla Tipo), idH(Tabla Habilidad), idA(Tabla Ataque)
 
 
 ===========================================================================
@@ -27,18 +27,18 @@ Tabla Ataque: tabla para definir el ataque que puede usar cada pokemon
 
     Atributos:
 
-        - idA : identificador del ataque. Clave primaria de la tabla Ataque.
-        - nombreA : nombre edl ataque.
-        - PP : número de veces que se puede usar el ataque en combate.
-        - Potencia : potencia de ataque como medida numérica 
-        - Precisión : probabilidad del ataque de acertar. Una precision nula quiere decir que el ataque del pokemon acertara siempre, independientemente de las condiciones del combate
-        - idT : identificador del tipo del ataque
+        - int       idA : identificador del ataque. Clave primaria de la tabla Ataque.
+        - String    nombreA : nombre edl ataque.
+        - int       PP : número de veces que se puede usar el ataque en combate.
+        - int       Potencia : potencia de ataque como medida numérica. Una potencia nula quiere decir que el ataque no hace daño. 
+        - int       Precisión : probabilidad del ataque de acertar. Una precision nula quiere decir que el ataque del pokemon acertará siempre, independientemente de las condiciones del combate
+        - int       idT : identificador del tipo del ataque.
     
     Restricciones:
 
         - Clave primaria : idA
         - not null : idA, nombreA, PP, idT
-        - Clave foránea : idT(Tipo), idH(Habilidad), idA(Ataque)
+        - Clave foránea : idT(Tabla Tipo)
 
 ===========================================================================
 Tabla Tipo
@@ -46,8 +46,8 @@ Tabla Tipo
 
     Atributos:
 
-        - idT : identificador del tipo. Clave primaria de la tabla Tipo. 
-        - nombreT : nombre del tipo
+        - int       idT : identificador del tipo. Clave primaria de la tabla Tipo. 
+        - String    nombreT : nombre del tipo.
     
     Restricciones:
 
@@ -60,9 +60,9 @@ Tabla Habilidad: tabla para definir la habilidad de cada pokemon
 
     Atributos: 
 
-        - idH : identificador de la habilidad. Clave primaria de la tabla Habilidad.
-        - nombreH : nombre de la habilidad.
-        - descripción
+        - int       idH : identificador de la habilidad. Clave primaria de la tabla Habilidad.
+        - String    nombreH : nombre de la habilidad.
+        - String    descripción
         
     Restricciones:
 
@@ -73,5 +73,64 @@ Tabla Habilidad: tabla para definir la habilidad de cada pokemon
 Justificación del diseño
 ===========================================================================
 
-    Control de errores
-        
+    Control de errores:
+
+        -Insertar Pokemon: 
+            Para insertar un Pokemon comprobamos que todos los valores introducidos cumplen
+            las restricciones, esto quiere decir que los atributos que tengan la restricción NOT NULL y el
+            usuario intente insertar un nulo para ese atributo se le mostrará un mensaje de error referente 
+            a que no se puede insertar nulos en ese atributo. En cambio, si todos los valores son correctos,
+            pero la clave primaria (idP) introducida por el usuario es igual a una ya existente en la tabla Pokemon
+            se le mostrará al usuario un mensaje de error de que ya existe un Pokemon con ese ID. Por último, si todo
+            es correcto se introducirá el Pokemon nuevo a la tabla Pokemon.
+
+        - Insertar ataque:
+            Para insertar un ataque comprobamos que todos los valores introducidos cumplen
+            las restricciones, esto quiere decir que los atributos que tengan la restricción NOT NULL y el
+            usuario intente insertar un nulo para ese atributo se le mostrará un mensaje de error referente 
+            a que no se puede insertar nulos en ese atributo. En cambio, si todos los valores son correctos,
+            pero la clave primaria (idA) introducida por el usuario es igual a una ya existente en la tabla Ataque
+            se le mostrará al usuario un mensaje de error de que ya existe un ataque con ese ID. Por último, si todo
+            es correcto se introducirá el ataque nuevo a la tabla Ataque.
+
+        - Eliminar Pokemon:
+            Para eliminar un Pokemon solicitamos al usuario que introduzca el ID del Pokemon que quiere eliminar.
+            En el caso de que el ID no corresponda con ningún Pokemon se le mostrará a usuario un mensaje de error
+            de que no existe ningún Pokemon con ese ID en la tabla Pokemon. Si el ID corresponde a un Pokemon se 
+            eliminará esa fila de la tabla Pokemon.
+
+        - Eliminar ataque:
+            Para eliminar un ataque solicitamos al usuario que introduzca el ID del ataque que quiere eliminar.
+            En el caso de que el ID no corresponda con ningún ataque se le mostrará a usuario un mensaje de error
+            de que no existe ningún ataque con ese ID en la tabla Ataque. Si el ID corresponde a un ataque, pero
+            ese ataque ya ha sido aprendido por un Pokemon se le mostrará al usuario un mensaje de error.
+            Por último, si el ID corresponde a un ataque y no lo ha aprendido ningún Pokemon se eliminará de la tabla
+            Ataque.
+
+        - Buscar Pokemon:
+            Para buscar un Pokemon el usuario tendrá que introducir el ID del Pokemon. Si el Pokemon no existe un
+            Pokemon con ese ID se le mostrará al usuario un mensaje de error de Pokemon inexistente. Si ese ID corresponde
+            a un Pokemon se le mostrará el detalle de ese Pokemon.
+
+        - Buscar Pokemon por tipo:
+            El usuario introducirá el ID del tipo (idT) para encontrar a los Pokemon correspondientes a ese tipo. Si para
+            ese tipo no hay ningún Pokemon asignado se mostrará que Pokemon encontrados que corresponden a ese tipo es 0.
+            En cambio, si ese tipo tiene Pokemon asignados se mostrará todos los Pokemon de ese tipo.
+
+        - Actualizar PP:
+            El usuario introducirá el ID del ataque (idA) al que quiere actualizar los PP y el nuevo valor de los PP.
+            Si el ataque no existe con ese ID se mostrará un mensaje de error. En cambio, si existe se actualizarán
+            los PP del ataque con el valor introducido por el usuario.
+
+        - Aumentar porcentaje ATK:
+            El usuario introducirá el ID del Pokemon (idP) al que quiere actualizar un porcentaje el ATK y el porcentaje que quiere 
+            incrementar. Si el Pokemon no existe con ese ID se mostrará un mensaje de error. En cambio, si existe se actualizará
+            el ATK.
+
+        - Intercambiar estadísitcas:
+            El usuario introducirá el ID del Pokemon (idP) y después introducirá el ID de otro Pokemon con el que
+            quiere intercambiar las estadísitcas (HP, ATK, DEF, SPE). Si uno de los dos Pokemon o los dos no existente
+            con ese ID se le mostrará al usuario un mensaje de error y no se realizan los updates. En cambio, si todo es correcto
+            se reaizará el intercambio. 
+
+    Transacciones:

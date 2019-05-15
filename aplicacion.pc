@@ -364,21 +364,21 @@ void intercambiar_estadisticas(){
 
     lectura2 = sqlca.sqlcode;
 
-    if (lectura2 != 1403){
+    if (lectura1 != 1403 && lectura2 != 1403){
         exec sql update pokemon
                 set hp = :hp2, atk = :atk2, def = :def2, spe = :spe2
                 where idp = :codigo_pok1;
-    }
 
-    if (!error && lectura1 != 1403){
-        exec sql update pokemon
-            set hp = :hp1, atk = :atk1, def = :def1, spe = :spe1
-            where idp = :codigo_pok2;
+        if (!error){
+            exec sql update pokemon
+                set hp = :hp1, atk = :atk1, def = :def1, spe = :spe1
+                where idp = :codigo_pok2;
+        }
     }
     
 
     if(!error){
-        if(lectura1==1403 || lectura2 = 1403){
+        if(lectura1==1403 || lectura2 == 1403){
             printf("\nUno de los Pokemon, o los dos no existen con ese ID\n");
         } else {
             printf("\nEstadísticas de los Pokemon intercambiadas\n");
